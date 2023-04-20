@@ -72,12 +72,22 @@ export const confirm = async (req, res, next) => {
 export const getOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({
-      // ...(req.isAdmin),
       isCompleted: true,
     })
 
     res.status(200).send(orders);
   } catch (err) {
     next(err);
+  }
+}
+
+export const deleteOrder = async (req, res, next) => {
+  try {
+      await Order.findByIdAndDelete(
+          req.params.id
+      );
+      res.status(200).json("Order has been deleted");
+  } catch (err) {
+      next(err);
   }
 }

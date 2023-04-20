@@ -33,18 +33,51 @@ export const login = async (req, res, next) => {
         return next(createError(400, "Wrong password!"));
   
       const token = jwt.sign(
-        { id: user._id, isAdmin: user.isAdmin },
-        process.env.JWT
+        { id: user._id, role: user.role },
+        process.env.JWT,
+        { expiresIn: "15m" }
       );
   
-      const { password, isAdmin, ...otherDetails } = user._doc;
+      const { password, role, ...otherDetails } = user._doc;
       res
         .cookie("access_token", token, {
           httpOnly: true,
         })
         .status(200)
-        .json({ details: { ...otherDetails }, isAdmin,token });
+        .json({ details: { ...otherDetails, role}, token });
     } catch (err) {
       next(err);
     }
   };
+
+  export const getUser = async (req, res, next) => {
+    try {
+        const user = await User.findById(
+            req.params.id
+        );
+        res.status(200).json(user);
+    } catch (err) {
+        next(err);
+    }
+}
+
+export const updateUser = async (req, res, next) => {
+  try {
+      const updatedUser = await User.findByIdAndUpdate(
+          req.params.id,
+          { $set: req.body },
+          { new: true });
+      res.status(200).json(updatedUser);
+  } catch (err) {
+      next(err);
+  }
+}
+
+export const getAllUser = async (req, res, next) => {
+  try {
+    const allUser = await User.find();
+    res.status(200).json(allUser);
+  } catch (err) {
+    next(err);
+  }
+};
